@@ -30,13 +30,9 @@ Basic knowledge of using the command line.
 Installation
 Clone or download the Money Tracker App repository to your local machine.
 
-bash
-Copy code
 git clone https://github.com/yourusername/money-tracker-app.git
 Navigate to the app's directory.
 
-bash
-Copy code
 cd money-tracker-app
 Install any required dependencies (there are none for this app).
 
@@ -44,8 +40,6 @@ Usage
 Starting the App
 To start the Money Tracker App, open your terminal or command prompt and navigate to the app's directory. Then, run the following command:
 
-bash
-Copy code
 python main.py
 Menu Options
 Add Income (Option 1): Enter the amount of income you received. This will increase your balance.
