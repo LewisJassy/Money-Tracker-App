@@ -12,7 +12,7 @@ class MoneyTracker:
 
     def load_transactions(self):
         try:
-            with open("money_transactions.json", "r") as file_data:
+            with open(self.file_path, "r") as file_data:
                 try:
                     self.transactions = json.load(file_data)
                 except json.decoder.JSONDecodeError:
@@ -35,10 +35,14 @@ class MoneyTracker:
     def add_expenses(self, amount):
         if amount > self.balance:
             print(f"Insufficient money, your current balance is ${self.balance}")
+        elif amount < 0:
+            print("Only positive digits")
+            raise ValueError
+
         else:
             self.balance -= amount
             transaction = {"type": "Expense", "amount": amount,
-                           "date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+                           "date": self.format_date()}
             self.transactions.append(transaction)
             self.save_transactions()
 
@@ -47,7 +51,10 @@ class MoneyTracker:
 
     def save_transactions(self):
         with open(self.file_path, "w") as file_data:
-            json.dump(self.transactions, file_data, indent=4)
+            json.dump(self.transactions, file_data, indent=4, sort_keys=True)
+
+    def format_date(self):
+        return datetime.datetime.now().strftime("%Y-%m-d %H:%M:%S")
 
     def start_app(self):
         print("Welcome to Money Tracker App")
@@ -60,10 +67,10 @@ class MoneyTracker:
 
             user_input = input("Choose from the menu above: ")
             if user_input == "1":
-                amount = float(input("Enter your income: "))
+                amount = int(input("Enter your income: "))
                 self.add_income(amount)
             elif user_input == "2":
-                amount = float(input("Enter your expense: "))
+                amount = int(input("Enter your expense: "))
                 self.add_expenses(amount)
             elif user_input == "3":
                 self.view_balance()
