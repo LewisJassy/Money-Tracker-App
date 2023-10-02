@@ -1,11 +1,9 @@
 import json
 import datetime
 
-
 class MoneyTracker:
     def __init__(self, file_path="money_transactions.json"):
         # Attributes
-        self.balance = 0
         self.transactions = []
         self.file_path = file_path
         self.load_transactions()
@@ -24,16 +22,21 @@ class MoneyTracker:
                             self.balance -= transaction['amount']
         except FileNotFoundError:
             pass
+        self.total_income = sum(
+            transaction['amount'] for transaction in self.transactions if transaction['type'] == "Income")
+        self.balance = self.total_income
 
     def add_income(self, amount):
         self.balance += amount
+        self.balance = self.total_income
         transaction = {"type": "Income", "amount": amount,
                        "date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         self.transactions.append(transaction)
         self.save_transactions()
 
+
     def add_expenses(self, amount):
-        if amount > self.balance:
+        if amount > self.total_income:
             print(f"Insufficient money, your current balance is ${self.balance}")
         elif amount < 0:
             print("Only positive digits")
@@ -41,13 +44,14 @@ class MoneyTracker:
 
         else:
             self.balance -= amount
+            self.total_income -= amount
             transaction = {"type": "Expense", "amount": amount,
                            "date": self.format_date()}
             self.transactions.append(transaction)
             self.save_transactions()
 
     def view_balance(self):
-        print(f"New Balance is: ${self.balance}")
+        print(f"New Balance is: ${self.total_income}")
 
     def save_transactions(self):
         with open(self.file_path, "w") as file_data:
@@ -82,6 +86,4 @@ class MoneyTracker:
                 break
 
 
-money_tracker = MoneyTracker()
-money_tracker.start_app()
 
