@@ -4,6 +4,7 @@ import datetime
 class MoneyTracker:
     def __init__(self, file_path="money_transactions.json"):
         # Attributes
+        #self.balance = 0
         self.transactions = []
         self.file_path = file_path
         self.load_transactions()
@@ -15,28 +16,22 @@ class MoneyTracker:
                     self.transactions = json.load(file_data)
                 except json.decoder.JSONDecodeError:
                     self.transactions = {}
-                    for transaction in self.transactions:
-                        if transaction['type'] == "Income":
-                            self.balance += transaction['amount']
-                        elif transaction['type'] == "Expense":
-                            self.balance -= transaction['amount']
         except FileNotFoundError:
             pass
-        self.total_income = sum(
-            transaction['amount'] for transaction in self.transactions if transaction['type'] == "Income")
-        self.balance = self.total_income
+
+        self.calculate_balance()
 
     def add_income(self, amount):
         self.balance += amount
-        self.balance = self.total_income
         transaction = {"type": "Income", "amount": amount,
                        "date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         self.transactions.append(transaction)
+        self.calculate_balance()
         self.save_transactions()
 
 
     def add_expenses(self, amount):
-        if amount > self.total_income:
+        if amount > self.balance:
             print(f"Insufficient money, your current balance is ${self.balance}")
         elif amount < 0:
             print("Only positive digits")
@@ -44,14 +39,30 @@ class MoneyTracker:
 
         else:
             self.balance -= amount
-            self.total_income -= amount
             transaction = {"type": "Expense", "amount": amount,
                            "date": self.format_date()}
             self.transactions.append(transaction)
+            self.calculate_balance()
             self.save_transactions()
 
+    def calculate_balance(self):
+        self.balance = 0
+        for transaction in self.transactions:
+            if transaction['type'] == "Income":
+                self.balance += transaction['amount']
+            elif transaction['type'] == "Expense":
+                self.balance -= transaction['amount']
+
+    def get_balance(self):
+        return self.balance
+
+    def get_total_income(self):
+        total_income = sum(
+            transaction['amount'] for transaction in self.transactions if transaction['type'] == "Income")
+        return total_income
+
     def view_balance(self):
-        print(f"New Balance is: ${self.total_income}")
+        return self.balance
 
     def save_transactions(self):
         with open(self.file_path, "w") as file_data:
@@ -76,14 +87,11 @@ class MoneyTracker:
             elif user_input == "2":
                 amount = int(input("Enter your expense: "))
                 self.add_expenses(amount)
-            elif user_input == "3":
-                self.view_balance()
+            # elif user_input == "3":
+            #     self.view_balance()
             elif user_input == "4":
                 print("Exiting Money Tracker App. Have a great day!")
                 break
             else:
                 print("Exiting Money Tracker App. Have a great day!")
                 break
-
-
-
